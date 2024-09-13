@@ -161,5 +161,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-# Ignore the FaceForensics++ dataset from kaggle https://www.kaggle.com/datasets/hungle3401/faceforensics
-dataset/downloaded_videos
+
