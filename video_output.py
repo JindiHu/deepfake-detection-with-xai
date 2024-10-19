@@ -24,15 +24,15 @@ def process_video(video_path):
         frames.append(frame)
 
     cap.release()
+ #   print(f"Total frames extracted: {len(frames)}")  # Print the total number of frames
     return np.array(frames)
 
 # Function to predict deepfake
 def predict_deepfake(frames):
-    # Convert frames to PyTorch tensors
     processed_frames = [processor(images=frame, return_tensors="pt")['pixel_values'] for frame in frames]
-    inputs = torch.cat(processed_frames)  # Concatenate tensors into a single tensor
-    outputs = model(inputs)  # Get model outputs
-    predictions = outputs.logits.argmax(dim=-1).numpy()  # Get predicted classes
+    inputs = torch.cat(processed_frames)
+    outputs = model(inputs)
+    predictions = outputs.logits.argmax(dim=-1).numpy()
     return predictions
 
 # Function to explain predictions using LIME
@@ -56,34 +56,53 @@ def visualize_lime_explanation(frame, explanation, label):
 
 # Main function to process all videos in a directory
 def main(video_folder, output_folder):
-    # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
 
-    # Get all .mp4 files in the specified folder
     video_files = [f for f in os.listdir(video_folder) if f.endswith('.mp4')]
-    
+
     for video_file in video_files:
         video_path = os.path.join(video_folder, video_file)
-        print(f"Processing video: {video_file}")
-        
+        print(f"Processing video: {video_file}")      
         frames = process_video(video_path)
 
-        # Predict deepfake
         predictions = predict_deepfake(frames)
         print(f"Predictions for {video_file}:", predictions)
 
-        # Explain predictions for the first frame
-        if len(frames) > 0:
-            explanation = explain_prediction(frames[0])
-            label = predictions[0]  # Get the predicted class
-            img_boundry = visualize_lime_explanation(frames[0], explanation, label)
+        # Create video writer for output video
+        output_video_path = os.path.join(output_folder, f"{os.path.splitext(video_file)[0]}_lime.mp4")
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(output_video_path, fourcc, 30.0, (1024, 720))
 
-            # Save the image with LIME boundaries
-            output_image_path = os.path.join(output_folder, f"{os.path.splitext(video_file)[0]}_lime.png")
-            cv2.imwrite(output_image_path, img_boundry * 255)  # Scale to 0-255 for saving
-            print(f"Saved LIME explanation to: {output_image_path}")
+        # Explain predictions for the first frame and save the explanation
+        # if len(frames) > 0:
+        #     print("Processing image output...")
+        #     explanation = explain_prediction(frames[0])
+        #     label = predictions[0]  # Get the predicted class for the first frame
+        #     img_boundry = visualize_lime_explanation(frames[0], explanation, label)
+            
+        #     # Save the image with LIME boundaries for the first frame
+        #     output_image_path = os.path.join(output_folder, f"{os.path.splitext(video_file)[0]}_lime.png")
+        #     cv2.imwrite(output_image_path, img_boundry * 255)  # Scale to 0-255 for saving
+        #     print(f"Saved LIME explanation to: {output_image_path}")
+        
+        
+        num=0
+        # Process each frame for the video output
+        for i, frame in enumerate(frames):
+            num=num+1
+            print(f"Processing {num} out of {len(frames)} frames...")
+            explanation = explain_prediction(frame)
+            label = predictions[i]  # Get the predicted class for the current frame
+            img_boundry = visualize_lime_explanation(frame, explanation, label)
+
+            # Write the frame with LIME boundaries to the video
+            out.write((img_boundry * 255).astype(np.uint8))
+
+        out.release()  # Finalize the video file
+        print(f"Saved LIME explanation video to: {output_video_path}")
+
 
 # Replace with your folder path containing .mp4 videos and output folder
-video_folder = 'C:\\Users\\Jay\\Downloads\\original_sequences\\original_sequences\\actors\\c23\\videos'  # Update this path
-output_folder = 'C:\\Users\\Jay\\Downloads\\original_sequences\\RealOutput'  # Update this path
+video_folder = './dataset/manipulated_sequences/DeepFakeDetection/c23/videos'  # Update this path
+output_folder = './output'  # Update this path
 main(video_folder, output_folder)

@@ -1,0 +1,2 @@
+Deepfake detection model:
+https://huggingface.co/dima806/deepfake_vs_real_image_detection

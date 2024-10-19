@@ -84,6 +84,6 @@ def main(video_folder, output_folder):
             print(f"Saved LIME explanation to: {output_image_path}")
 
 # Replace with your folder path containing .mp4 videos and output folder
-video_folder = 'C:\\Users\\Jay\\Downloads\\original_sequences\\original_sequences\\actors\\c23\\videos'  # Update this path
-output_folder = 'C:\\Users\\Jay\\Downloads\\original_sequences\\RealOutput'  # Update this path
+video_folder = './dataset/manipulated_sequences/DeepFakeDetection/c23/videos'  # Update this path
+output_folder = './output'  # Update this path
 main(video_folder, output_folder)
