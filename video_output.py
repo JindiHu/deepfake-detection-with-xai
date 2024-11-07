@@ -103,6 +103,6 @@ def main(video_folder, output_folder):
 
 
 # Replace with your folder path containing .mp4 videos and output folder
-video_folder = './dataset/manipulated_sequences/DeepFakeDetection/c23/videos'  # Update this path
+video_folder = './input'  # Update this path
 output_folder = './output'  # Update this path
 main(video_folder, output_folder)
